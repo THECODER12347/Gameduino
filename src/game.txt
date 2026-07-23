@@ -1,0 +1,101 @@
+character Camel{
+    Number xValue = 0;
+    Number yValue = 0;
+    Number inputValue = 0;
+    AnimationFrame camelAlive = [0,0,0,1,1,
+                                   0,0,0,1,0,
+                                   0,1,0,1,0,
+                                   1,1,1,1,0,
+                                   1,1,1,1,0,
+                                   1,0,0,1,0,
+                                   1,0,0,1,0,
+                                   1,0,0,1,0];
+
+    AnimationFrame loseScreen = [0,0,1,0,0,
+                                     1,0,1,0,1,
+                                     0,1,1,1,0,
+                                     1,1,1,1,1,
+                                     0,1,1,1,0,
+                                     1,0,1,0,1,
+                                     0,0,1,0,0,
+                                     0,1,0,1,0];
+
+    on calculateIO()<void>{
+        Camel.inputValue = getSingularInput();
+
+        if(Camel.inputValue isEqualTo 2){
+            if(Camel.yValue isEqualTo 1){
+                Camel.yValue = 0;
+            }
+        }
+
+        if(Camel.inputValue isEqualTo 4){
+            if(Camel.yValue isEqualTo 0){
+                Camel.yValue = 1;
+            }
+        }
+    }
+
+    on generateShow()<void>{
+        run showImage(Camel.camelAlive Camel.xValue Camel.yValue);
+    }
+}
+
+character Building{
+    Number xLoc = 15;
+    Number yLoc = 0;
+    AnimationFrame animFrame = [1,1,1,1,1,
+                                  1,0,1,0,1,
+                                  1,1,1,1,1,
+                                  1,0,1,0,1,
+                                  1,1,1,1,1,
+                                  1,0,1,0,1,
+                                  1,1,1,1,1,
+                                  1,1,0,1,1];
+
+
+    on generateNewBuilding()<void>{
+        Building.yLoc = getRandomNumber();
+        if(Building.yLoc isGreaterThan 84){
+            Building.yLoc = 1;
+        }else{
+            Building.yLoc = 0;
+        }
+    }
+
+    on calcNewLocation()<void>{
+        if(Building.xLoc isLessThan 2){
+            Building.xLoc = 14;
+            run Building.generateNewBuilding();
+        }else{
+            Building.xLoc -= 1;
+        }
+    }
+
+    on generateShow()<void>{
+        run showImage(Building.animFrame Building.xLoc Building.yLoc);
+    }
+
+    on checkDeath()<void>{
+        Camel.xValue += 1;
+        if(Building.yLoc isEqualTo Camel.yValue){
+            if(Building.xLoc isEqualTo Camel.xValue){
+                Camel.xValue-=1;
+                run gameEnd();
+            }
+        }
+        Camel.xValue-=1;
+    }
+}
+
+when gameLoop{
+    run Camel.calculateIO();
+    run Camel.generateShow();
+    run Building.calcNewLocation();
+    run Building.generateShow();
+    run Building.checkDeath();
+}
+
+when gameEnd{
+    run showImage(Camel.loseScreen Camel.xValue Camel.xValue);
+}
